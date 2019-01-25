@@ -144,3 +144,104 @@ mvn spring-boot:run -Drun.jvmArguments="-Dspring.profiles.active=test"
 in google search spring boot common application properties
 https://docs.spring.io/spring-boot/docs/1.1.6.RELEASE/reference/html/common-application-properties.html
 
+
+== h2 db
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-data-jpa</artifactId>
+      </dependency>
+
+      <dependency>
+          <groupId>com.h2database</groupId>
+          <artifactId>h2</artifactId>
+      </dependency>
+
+#add following properties
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2
+
+rerun app with NO vm arguments
+
+then in browser goto http://localhost:8080/h2
+and you will see a default h2 db login page
+you can login and see whats what!
+
+## change name of db
+
+spring.datasource.url=jdbc:h2:file:~/dasboot
+spring.datasource.username=sa
+spring.dataspource.password=
+spring.datasource.driver-class-name=org.h2.Driver
+
+now file is ~/dasboot rather than the default ~/test
+
+
+# added some db pooling properties
+spring.datasource.max-active=10
+spring.datasource.max-idle=8
+spring.datasource.min-idle=8
+spring.datasource.time-between-eviction-runs-millis=1
+spring.datasource.min-evictable-idle-time-millis=1000
+spring.datasource.max-wait=10000
+
+flyway.baseline-on-migrate=true
+spring.jpa.hibernate.ddl-auto=false;
+
+
+# add alt db
+      <dependency>
+          <groupId>org.flywaydb</groupId>
+          <artifactId>flyway-core</artifactId>
+      </dependency>
+
+add .../dasboot/src/main/resources/db/migration/V2__create_shipwreck.sql
+
+CREATE TABLE SHIPWRECK(
+    ID INT AUTO_INCREMENT,
+    NAME VARCHAR(255),
+    DESCRIPTION VARCHAR(2000),
+    CONDITION VARCHAR(255),
+    DEPTH INT,
+    LATITUDE DOUBLE,
+    LONGITUDE DOUBLE,
+    YEAR_DISCOVERED INT
+    );
+
+NB now you still have h2 named file db that persists but a created db table
+
+## add second db bean
+
+add these properties
+
+datasource.flyway.url=jdbc:h2:file:~/dasboot
+datasource.flyway.username=sa
+datasource.flyway.password=
+datasource.flyway.driver-class-name=org.h2.Driver
+
+.../creating-first-app-with-springboot/dasboot/src/main/java/com/boot/config/PersistenceConfiguration.java
+import org.springframework.boot.autoconfigure.flyway.FlywayDataSource;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import javax.sql.DataSource;
+
+@Configuration
+public class PersistenceConfiguration {
+    @Bean
+    @ConfigurationProperties(prefix = "spring.datasource")
+    @Primary
+    public DataSource dataSource(){
+        return DataSourceBuilder.create().build();
+    }
+    @Bean
+    @ConfigurationProperties(prefix = "datasource.flyway")
+    @FlywayDataSource
+    public DataSource flywayDataSource(){
+        return DataSourceBuilder.create().build();
+    }
+}
+
+both beans are instantiated at boot!
+
