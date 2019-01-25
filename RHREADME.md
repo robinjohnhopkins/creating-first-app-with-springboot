@@ -245,3 +245,37 @@ public class PersistenceConfiguration {
 
 both beans are instantiated at boot!
 
+## add model to db
+
+the model.Shipwreck class before had no annotations - add the following
+
+        import javax.persistence.Entity;
+        import javax.persistence.GeneratedValue;
+        import javax.persistence.GenerationType;
+        import javax.persistence.Id;
+
+        @Entity
+        public class Shipwreck {
+
+            @Id
+            @GeneratedValue(strategy = GenerationType.AUTO)
+            Long id;
+            String name;
+            String description;
+            String condition;
+            Integer depth;
+            Double latitude;
+            Double longitude;
+            Integer yearDiscovered;
+
+## add interface
+        package com.boot.repository;
+
+        import com.boot.model.Shipwreck;
+        import org.springframework.data.jpa.repository.JpaRepository;
+
+        public interface ShipwreckRepository extends JpaRepository<Shipwreck, Long> {
+        }
+NB at this point the app can be run without error
+
+
