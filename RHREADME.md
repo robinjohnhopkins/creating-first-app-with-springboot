@@ -333,7 +333,8 @@ NB now app is fully functional using CRUD with db.
         import org.mockito.InjectMocks;
         import org.mockito.Mock;
         import org.mockito.MockitoAnnotations;
-
+        import static org.hamcrest.MatcherAssert.assertThat;
+        import static org.hamcrest.Matchers.*;
         import static org.junit.Assert.assertEquals;
         import static org.mockito.Mockito.times;
         import static org.mockito.Mockito.verify;
@@ -368,6 +369,8 @@ NB now app is fully functional using CRUD with db.
                 verify(shipwreckRepository, times(2)).findOne(1L);
 
                 assertEquals("check id of first wreck", 1L, wreck.getId().longValue());
+                //add hamcrest test
+                assertThat(wreck.getId(), is(1L));
             }
         }
 
