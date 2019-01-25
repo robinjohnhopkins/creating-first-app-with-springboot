@@ -278,4 +278,47 @@ the model.Shipwreck class before had no annotations - add the following
         }
 NB at this point the app can be run without error
 
+## make app use db - update ShipwreckController
+    package com.boot.controller;
+
+    import com.boot.model.Shipwreck;
+    import com.boot.repository.ShipwreckRepository;
+    import org.springframework.beans.BeanUtils;
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.web.bind.annotation.*;
+    import java.util.List;
+
+    @RequestMapping("api/v1/")
+    @RestController
+    public class ShipwreckController {
+        @Autowired
+        private ShipwreckRepository shipwreckRepository;
+        @RequestMapping(value = "shipwrecks", method = RequestMethod.GET)
+        public List<Shipwreck> list() {
+            return shipwreckRepository.findAll();
+        }
+        @RequestMapping(value = "shipwrecks", method = RequestMethod.POST)
+        public Shipwreck create(@RequestBody Shipwreck shipwreck) {
+            return shipwreckRepository.saveAndFlush(shipwreck);
+        }
+        @RequestMapping(value = "shipwrecks/{id}", method = RequestMethod.GET)
+        public Shipwreck get(@PathVariable Long id) {
+            return shipwreckRepository.findOne(id);
+        }
+        @RequestMapping(value = "shipwrecks/{id}", method = RequestMethod.PUT)
+        public Shipwreck update(@PathVariable Long id, @RequestBody Shipwreck shipwreck) {
+            Shipwreck existingShipwreck = shipwreckRepository.findOne(id);
+            BeanUtils.copyProperties(shipwreck, existingShipwreck);
+            return shipwreckRepository.saveAndFlush(existingShipwreck);
+        }
+        @RequestMapping(value = "shipwrecks/{id}", method = RequestMethod.DELETE)
+        public Shipwreck delete(@PathVariable Long id) {
+            Shipwreck existingShipwreck = shipwreckRepository.findOne(id);
+            shipwreckRepository.delete(existingShipwreck);
+            return existingShipwreck;
+        }
+    }
+
+NB now app is fully functional using CRUD with db.
+
 
